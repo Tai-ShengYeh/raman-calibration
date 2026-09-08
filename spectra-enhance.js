@@ -48,7 +48,7 @@ function enhance(svg){
   if(fig && !fig.querySelector('.spectra-help')){
     var h=document.createElement('div');
     h.className='spectra-help';
-    h.innerHTML='📌 <b>讀圖方式：</b>紅色數字是教材已標示的實測 peak Raman shift；保留原始 x 軸，不再用游標重新推算數值，避免因 SVG 文字位置偏移造成讀值錯誤。';
+    h.innerHTML='📌 <span lang="zh-Hant"><b>讀圖方式：</b>紅色數字是教材已標示的實測 peak Raman shift；保留原始 x 軸，不再用游標重新推算數值，避免因 SVG 文字位置偏移造成讀值錯誤。</span><span lang="en"><b>How to read this figure:</b> the red numbers are the measured peak Raman shifts already labelled in the material; the original x-axis is kept and values are no longer re-derived from the cursor, to avoid misreadings caused by shifted SVG text positions.</span>';
     fig.appendChild(h);
   }
 }

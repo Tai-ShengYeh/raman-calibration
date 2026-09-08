@@ -1,0 +1,209 @@
+/* Shared bilingual controls and glossary styles for the Raman teaching site. */
+html[lang="zh-Hant"] [lang="en"],
+html[lang="en"] [lang="zh-Hant"] {
+  display: none !important;
+}
+
+/* The language control is deliberately visible in both language states. */
+html[lang="zh-Hant"] .i18n-toggle [lang],
+html[lang="en"] .i18n-toggle [lang],
+.i18n-toggle [lang] {
+  display: inline-flex !important;
+}
+
+.i18n-toggle {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 3px;
+  gap: 2px;
+  border: 1px solid rgba(148, 163, 184, .55);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .96);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, .2);
+  color: #1e293b;
+  isolation: isolate;
+}
+
+.i18n-toggle button {
+  min-width: 40px;
+  min-height: 40px;
+  padding: 5px 11px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #334155;
+  cursor: pointer;
+  font: inherit;
+  font-size: .84rem;
+  font-weight: 800;
+  line-height: 1;
+  transition: background-color .2s ease, color .2s ease, box-shadow .2s ease;
+}
+
+.i18n-toggle button:hover,
+.i18n-toggle button:focus-visible {
+  background: #e0e7ff;
+  outline: none;
+}
+
+.i18n-toggle button[aria-pressed="true"] {
+  background: #4f46e5;
+  color: #fff;
+  box-shadow: 0 3px 9px rgba(79, 70, 229, .28);
+}
+
+#i18n-slot {
+  display: inline-flex;
+  align-items: center;
+}
+
+body > .i18n-toggle {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 9999;
+}
+
+.term {
+  border-bottom: 2px dotted #4f46e5;
+  cursor: help;
+}
+
+.term-alt {
+  color: inherit;
+  opacity: .72;
+  font-size: .78em;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.i18n-popover {
+  position: fixed;
+  z-index: 10000;
+  width: min(340px, calc(100vw - 24px));
+  padding: 12px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 16px 42px rgba(15, 23, 42, .22);
+  color: #1e293b;
+  font-size: .9rem;
+  line-height: 1.5;
+}
+
+.i18n-popover[hidden] {
+  display: none;
+}
+
+.i18n-popover-title {
+  margin-bottom: 5px;
+  color: #3730a3;
+  font-weight: 850;
+}
+
+.i18n-popover-main {
+  font-weight: 650;
+}
+
+.i18n-popover-secondary {
+  margin-top: 4px;
+  color: #64748b;
+  font-size: .82rem;
+}
+
+.i18n-glossary {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 48px 20px;
+  color: #1e293b;
+}
+
+.i18n-glossary h2 {
+  margin: 0 0 8px;
+}
+
+.i18n-glossary-intro {
+  margin: 0 0 18px;
+  color: #64748b;
+}
+
+.i18n-glossary-filter {
+  width: min(100%, 460px);
+  min-height: 42px;
+  margin: 0 0 18px;
+  padding: 9px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #fff;
+  color: inherit;
+  font: inherit;
+}
+
+.i18n-glossary-table-wrap {
+  overflow-x: auto;
+}
+
+.i18n-glossary table {
+  width: 100%;
+  min-width: 680px;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+}
+
+.i18n-glossary th {
+  padding: 8px 12px;
+  color: #475569;
+  text-align: left;
+}
+
+.i18n-glossary td {
+  padding: 14px 12px;
+  background: #fff;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: top;
+}
+
+.i18n-glossary td:first-child {
+  border-left: 1px solid #e2e8f0;
+  border-radius: 10px 0 0 10px;
+}
+
+.i18n-glossary td:last-child {
+  border-right: 1px solid #e2e8f0;
+  border-radius: 0 10px 10px 0;
+}
+
+.i18n-glossary td > [lang] {
+  display: block;
+}
+
+@media (max-width: 780px) {
+  #i18n-slot .i18n-toggle {
+    min-height: 38px;
+  }
+
+  body > .i18n-toggle {
+    top: 10px;
+    right: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .i18n-toggle button {
+    transition: none;
+  }
+}
+
+/* Narrow screens: English headings make some data tables wider than a phone,
+   so let every content table scroll inside its own box instead of the page. */
+@media (max-width: 640px) {
+  table:not(.i18n-glossary table) {
+    display: block;
+    width: max-content;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
