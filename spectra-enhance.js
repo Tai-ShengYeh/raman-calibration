@@ -52,24 +52,52 @@ function enhance(svg){
  var fit=fitLinear(ticks); if(!fit)return;
  var xs=ticks.map(function(t){return t.b.x+t.b.width/2}),minX=Math.min.apply(null,xs),maxX=Math.max.apply(null,xs);
  var vals=ticks.map(function(t){return t.v}),lo=Math.min.apply(null,vals),hi=Math.max.apply(null,vals);
- var axisY=Math.min.apply(null,ticks.map(function(t){return t.b.y}));
- var plotTexts=texts.filter(function(o){return o.b.y<axisY-12});
+ var axisTextTop=Math.min.apply(null,ticks.map(function(t){return t.b.y}));
+ var plotBottom=axisTextTop-7;
+ var plotTexts=texts.filter(function(o){return o.b.y<axisTextTop-12});
  var topY=plotTexts.length?Math.max(8,Math.min.apply(null,plotTexts.map(function(o){return o.b.y}))):10;
  svg.dataset.spectraReady='1'; svg.classList.add('spectra-enhanced');
  ticks.forEach(function(t){t.e.dataset.spectraXTick='1'});
- Array.from(svg.querySelectorAll('text')).forEach(function(e){var q=txt(e);if(/Raman\s*(shift)?|拉曼位移|wavenumber|波數/i.test(q)&&/(cm|shift|位移|wavenumber|波數)/i.test(q)){var b=rootBox(e,svg);if(b&&b.y>=axisY-4&&!e.dataset.axisShift){var old=e.getAttribute('transform')||'';e.setAttribute('transform',(old+' translate(0 16)').trim());e.dataset.axisShift='1'}}});
+ Array.from(svg.querySelectorAll('text')).forEach(function(e){
+   var q=txt(e);
+   if(/Raman\s*(shift)?|拉曼位移|wavenumber|波數/i.test(q)&&/(cm|shift|位移|wavenumber|波數)/i.test(q)){
+     var b=rootBox(e,svg);
+     if(b&&b.y>=axisTextTop-4&&!e.dataset.axisShift){
+       var old=e.getAttribute('transform')||'';
+       e.setAttribute('transform',(old+' translate(0 30)').trim());
+       e.dataset.axisShift='1';
+     }
+   }
+ });
  var grid=make('g',{'class':'spectra-grid-layer','aria-hidden':'true'}); svg.insertBefore(grid,svg.firstChild);
+ var axis=make('g',{'class':'spectra-axis-layer','aria-hidden':'true'}); svg.appendChild(axis);
  function xFor(v){return (v-fit.intercept)/fit.slope}
- ticks.forEach(function(t){var x=t.b.x+t.b.width/2;grid.appendChild(make('line',{x1:x,y1:topY,x2:x,y2:axisY-2,'class':'spectra-grid-major'}))});
- if(hi-lo<=5000){var start=Math.ceil(lo/100)*100;for(var v=start;v<=hi;v+=100){var near=ticks.some(function(t){return Math.abs(t.v-v)<25});if(!near){var x=xFor(v);if(x>=minX&&x<=maxX)grid.appendChild(make('line',{x1:x,y1:topY,x2:x,y2:axisY-2,'class':'spectra-grid-minor'}))}}}
- var reader=make('g',{'class':'spectra-reader','aria-hidden':'true',visibility:'hidden'}),line=make('line',{y1:topY,y2:axisY-2,'class':'spectra-reader-line'}),dot=make('circle',{r:4,'class':'spectra-reader-dot'}),bg=make('rect',{width:124,height:26,'class':'spectra-reader-label-bg'}),label=make('text',{'class':'spectra-reader-label','text-anchor':'middle','dominant-baseline':'middle'}); reader.append(line,dot,bg,label); svg.appendChild(reader);
+ function addGrid(v,cls){var x=xFor(v);if(x>=minX&&x<=maxX)grid.appendChild(make('line',{x1:x,y1:topY,x2:x,y2:plotBottom,'class':cls}))}
+ function addAxisTick(v){
+   var x=xFor(v); if(x<minX||x>maxX)return;
+   axis.appendChild(make('line',{x1:x,y1:plotBottom,x2:x,y2:plotBottom+5,'class':'spectra-axis-tick'}));
+   var t=make('text',{x:x,y:axisTextTop+11,'text-anchor':'middle','class':'spectra-axis-label'});t.textContent=String(v);axis.appendChild(t);
+ }
+ if(hi-lo<=5000){
+   var gStart=Math.ceil(lo/100)*100;
+   for(var gv=gStart;gv<=hi;gv+=100){
+     var cls=(gv%500===0)?'spectra-grid-major':((gv%250===0)?'spectra-grid-mid':'spectra-grid-minor');
+     addGrid(gv,cls);
+   }
+   var labelStep=250;
+   var labelStart=Math.ceil(lo/labelStep)*labelStep;
+   for(var lv=labelStart;lv<=hi;lv+=labelStep)addAxisTick(lv);
+ }else{
+   ticks.forEach(function(t){var x=t.b.x+t.b.width/2;grid.appendChild(make('line',{x1:x,y1:topY,x2:x,y2:plotBottom,'class':'spectra-grid-major'}));var tt=make('text',{x:x,y:axisTextTop+11,'text-anchor':'middle','class':'spectra-axis-label'});tt.textContent=String(Math.round(t.v));axis.appendChild(tt)});
+ }
+ var reader=make('g',{'class':'spectra-reader','aria-hidden':'true',visibility:'hidden'}),line=make('line',{y1:topY,y2:plotBottom,'class':'spectra-reader-line'}),dot=make('circle',{r:4,'class':'spectra-reader-dot'}),bg=make('rect',{width:124,height:26,'class':'spectra-reader-label-bg'}),label=make('text',{'class':'spectra-reader-label','text-anchor':'middle','dominant-baseline':'middle'}); reader.append(line,dot,bg,label); svg.appendChild(reader);
  function valFor(x){return fit.intercept+fit.slope*x}
  function localX(ev){var p=svg.createSVGPoint();p.x=ev.clientX;p.y=ev.clientY;var m=svg.getScreenCTM();if(!m)return null;return p.matrixTransform(m.inverse()).x}
- function show(x,pin){x=Math.max(minX,Math.min(maxX,x));var v=valFor(x);line.setAttribute('x1',x);line.setAttribute('x2',x);dot.setAttribute('cx',x);dot.setAttribute('cy',axisY-3);var lx=Math.max(minX+62,Math.min(maxX-62,x));bg.setAttribute('x',lx-62);bg.setAttribute('y',topY+5);label.setAttribute('x',lx);label.setAttribute('y',topY+18);label.textContent=v.toFixed(1)+' cm⁻¹';reader.setAttribute('visibility','visible');if(pin)svg.dataset.spectraPinned='1'}
+ function show(x,pin){x=Math.max(minX,Math.min(maxX,x));var v=valFor(x);line.setAttribute('x1',x);line.setAttribute('x2',x);dot.setAttribute('cx',x);dot.setAttribute('cy',plotBottom);var lx=Math.max(minX+62,Math.min(maxX-62,x));bg.setAttribute('x',lx-62);bg.setAttribute('y',topY+5);label.setAttribute('x',lx);label.setAttribute('y',topY+18);label.textContent=v.toFixed(1)+' cm⁻¹';reader.setAttribute('visibility','visible');if(pin)svg.dataset.spectraPinned='1'}
  svg.addEventListener('pointermove',function(ev){if(svg.dataset.spectraPinned)return;var x=localX(ev);if(x!==null)show(x,false)});
  svg.addEventListener('pointerleave',function(){if(!svg.dataset.spectraPinned)reader.setAttribute('visibility','hidden')});
  svg.addEventListener('click',function(ev){var x=localX(ev);if(x===null)return;if(svg.dataset.spectraPinned){delete svg.dataset.spectraPinned;reader.setAttribute('visibility','hidden')}else show(x,true)});
- var fig=svg.closest('figure');if(fig&&!fig.querySelector('.spectra-help')){var h=document.createElement('div');h.className='spectra-help';h.innerHTML='🔎 <b>座標讀值器：</b>依圖上的 x 軸刻度重新校準後讀取 Raman shift；滑鼠／手指移動可讀值，點一下固定垂直線。這是座標讀值，不會自動判定峰頂。';fig.appendChild(h)}
+ var fig=svg.closest('figure');if(fig&&!fig.querySelector('.spectra-help')){var h=document.createElement('div');h.className='spectra-help';h.innerHTML='🔎 <b>座標讀值器：</b>x 軸每 <b>250 cm⁻¹</b> 顯示數字、每 <b>100 cm⁻¹</b> 有垂直輔助線；滑鼠／手指可讀取精確 Raman shift，點一下可固定垂直線。';fig.appendChild(h)}
 }
 function run(){document.querySelectorAll('svg').forEach(enhance)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run);else run();
