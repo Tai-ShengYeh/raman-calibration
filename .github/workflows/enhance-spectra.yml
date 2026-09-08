@@ -1,0 +1,28 @@
+name: Enhance Raman spectrum readability
+on:
+  push:
+    paths:
+      - '.github/workflows/enhance-spectra.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  enhance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Inject shared spectrum enhancements
+        run: python tools/inject_spectra_enhancements.py
+      - name: Commit generated HTML updates
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet; then
+            echo "No HTML changes needed"
+            exit 0
+          fi
+          git add raman_calibration_tutorial.html raman_calibration_unit1b.html raman_food_additives_tutorial.html
+          git commit -m "Improve Raman spectrum axes and add peak reader"
+          git push
