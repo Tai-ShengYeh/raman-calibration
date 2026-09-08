@@ -1,10 +1,35 @@
-<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>拉曼光譜儀波長校正教材</title>
-<style>body{font-family:system-ui,"Noto Sans TC",sans-serif;max-width:720px;margin:3rem auto;padding:0 1rem;line-height:1.7;color:#222}a{color:#0b6e6e}li{margin:.6rem 0}</style></head>
-<body><h1>拉曼光譜儀波長校正教材</h1>
-<ol>
-<li><a href="raman_calibration_tutorial.html">校正原理：從像素到波長、波數</a></li>
-<li><a href="raman_calibration_unit1b.html">兩台儀器的體檢報告：波長軸、雷射波長與二階繞射</a></li>
-<li><a href="raman_food_additives_tutorial.html">食品添加物拉曼指紋</a></li>
-</ol>
-<p>原始資料、重算腳本與學生版學習單見 <a href="https://github.com/Tai-ShengYeh/raman-calibration">GitHub repo</a>。</p>
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="拉曼光譜儀波長校正互動教材：從校正原理、儀器診斷到食品添加物拉曼指紋。">
+<title>Raman Calibration｜拉曼光譜儀波長校正教材</title>
+<style>
+:root{--navy:#071a38;--blue:#1d6ff2;--cyan:#39c7dc;--gold:#ffc94a;--ink:#10274a;--muted:#60718e;--paper:#f7fbff}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:system-ui,-apple-system,"Noto Sans TC","Microsoft JhengHei",sans-serif;color:var(--ink);background:var(--paper);line-height:1.75}a{text-decoration:none;color:inherit}
+.hero{min-height:650px;color:#fff;position:relative;overflow:hidden;background:radial-gradient(circle at 75% 30%,rgba(57,199,220,.28),transparent 22%),radial-gradient(circle at 88% 75%,rgba(123,80,255,.25),transparent 22%),linear-gradient(120deg,#06152f 0%,#092b50 52%,#07162f 100%)}
+.hero:before{content:"";position:absolute;inset:0;opacity:.34;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:34px 34px}
+.nav,.hero-inner,.section{max-width:1120px;margin:auto}.nav{height:76px;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:2;padding:0 22px}.brand{font-weight:850;font-size:1.25rem}.brand small{display:block;font-size:.68rem;font-weight:500;color:#a9c7ea;letter-spacing:.08em}.nav a.repo{border:1px solid #6685aa;border-radius:999px;padding:8px 17px;font-size:.9rem}
+.hero-inner{position:relative;z-index:1;padding:82px 22px 95px;display:grid;grid-template-columns:1.15fr .85fr;gap:70px;align-items:center}.eyebrow{color:#83dcff;font-weight:750;letter-spacing:.08em}.hero h1{font-size:clamp(3rem,7vw,5.5rem);line-height:1;margin:.18em 0}.hero h1 span{color:var(--gold)}.hero h2{font-size:clamp(1.25rem,2.5vw,2rem);margin:0 0 20px}.lead{font-size:1.08rem;color:#cfdef0;max-width:650px}.buttons{display:flex;gap:13px;flex-wrap:wrap;margin-top:28px}.btn{display:inline-block;border-radius:999px;padding:12px 23px;font-weight:750;background:linear-gradient(90deg,#1677ff,#7357ff);box-shadow:0 10px 28px #0005}.btn.alt{background:transparent;border:1px solid #90a9c7;box-shadow:none}
+.spectrum{height:320px;border:1px solid #ffffff25;border-radius:26px;background:linear-gradient(180deg,#ffffff0d,#ffffff04);position:relative;box-shadow:0 30px 70px #0006;overflow:hidden}.spectrum:after{content:"Raman shift  →";position:absolute;bottom:15px;right:20px;color:#a8bad0;font-size:.8rem}.laser{position:absolute;left:50%;top:0;width:3px;height:100%;background:#ff3e46;box-shadow:0 0 9px #ff3344,0 0 28px #ff3344}.sample{position:absolute;width:80px;height:35px;border-radius:50%;background:radial-gradient(circle,#fff,#ef7c85 18%,#a61328 45%,#280a18 72%);left:calc(50% - 40px);bottom:32px;box-shadow:0 0 50px #ff263d}.peak{position:absolute;bottom:48px;width:2px;background:#53c9ff;transform-origin:bottom;box-shadow:0 0 8px #36bfff}.p1{left:10%;height:38px}.p2{left:22%;height:90px}.p3{left:34%;height:55px}.p4{left:48%;height:150px}.p5{left:62%;height:72px}.p6{left:75%;height:125px}.p7{left:88%;height:52px}
+.section{padding:78px 22px}.center{text-align:center}.section h2{font-size:clamp(1.8rem,4vw,2.7rem);margin:0 0 8px}.sub{color:var(--muted);margin:0 auto 38px;max-width:750px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}.card{background:#fff;border:1px solid #dce9f6;border-radius:24px;padding:28px;box-shadow:0 12px 38px #284d7610;transition:.2s}.card:hover{transform:translateY(-5px);box-shadow:0 18px 45px #284d7620}.num{width:42px;height:42px;display:grid;place-items:center;border-radius:13px;color:#fff;font-weight:850;background:linear-gradient(135deg,#2179f6,#754df1);margin-bottom:18px}.card h3{margin:0 0 8px;font-size:1.25rem}.card p{color:var(--muted);min-height:86px}.go{font-weight:750;color:#176ae8}.path{background:linear-gradient(180deg,#eef7ff,#f8fbff)}
+.guide{display:grid;grid-template-columns:1fr 1fr;gap:24px}.panel{border-radius:24px;padding:30px;background:#eaf7ff}.panel:nth-child(2){background:#effbef}.panel h3{font-size:1.4rem;margin-top:0}.chips{display:flex;flex-wrap:wrap;gap:8px}.chip{background:#fff;border-radius:999px;padding:6px 12px;font-size:.88rem}.footer{text-align:center;padding:36px 20px 48px;color:#71809a;background:#fff;border-top:1px solid #e3edf7}.footer strong{color:#243d64}
+@media(max-width:780px){.hero-inner{grid-template-columns:1fr;padding-top:45px;gap:35px}.hero{min-height:auto}.spectrum{height:250px}.cards,.guide{grid-template-columns:1fr}.card p{min-height:0}.nav .repo{display:none}}
+</style>
+</head>
+<body>
+<header class="hero">
+<nav class="nav"><div class="brand">Raman Calibration<small>FROM SPECTRA TO RELIABLE ANSWERS</small></div><a class="repo" href="https://github.com/Tai-ShengYeh/raman-calibration">GitHub Repository ↗</a></nav>
+<div class="hero-inner">
+<div><div class="eyebrow">INTERACTIVE LEARNING · 拉曼光譜教學</div><h1>Raman <span>Calibration</span></h1><h2>從「看到光譜」到「相信數據」</h2><p class="lead">拉曼光譜上的峰，不只是漂亮的線條。儀器的波長軸、雷射波長與光柵繞射，都可能影響最後的 Raman shift。這套教材用實際資料與互動案例，帶你一步一步理解校正、診斷問題，最後把方法用在真實樣品。</p><div class="buttons"><a class="btn" href="#learn">開始學習 →</a><a class="btn alt" href="#route">先看學習路線</a></div></div>
+<div class="spectrum" aria-label="拉曼光譜與雷射示意圖"><div class="laser"></div><div class="sample"></div><i class="peak p1"></i><i class="peak p2"></i><i class="peak p3"></i><i class="peak p4"></i><i class="peak p5"></i><i class="peak p6"></i><i class="peak p7"></i></div>
+</div></header>
+<section class="section center" id="route"><h2>這套教材怎麼學？</h2><p class="sub">不用先背公式。先建立直覺，再檢查真實儀器資料，最後把拉曼指紋用到食品分析。建議依 ① → ② → ③ 的順序進行。</p><div class="cards" id="learn">
+<a class="card" href="raman_calibration_tutorial.html"><div class="num">01</div><h3>先懂校正原理</h3><p>從 detector pixel、波長到 Raman shift，理解「為什麼要校正」以及校正曲線如何建立。</p><span class="go">進入：校正原理 →</span></a>
+<a class="card" href="raman_calibration_unit1b.html"><div class="num">02</div><h3>幫儀器做體檢</h3><p>比較兩台儀器，實際判讀波長軸、雷射波長與二階繞射造成的問題，練習像分析人員一樣找原因。</p><span class="go">進入：儀器體檢 →</span></a>
+<a class="card" href="raman_food_additives_tutorial.html"><div class="num">03</div><h3>挑戰真實食品樣品</h3><p>把前面建立的光譜觀念帶到食品添加物，觀察拉曼指紋，連結儀器分析與實際食品分析情境。</p><span class="go">進入：食品添加物 →</span></a>
+</div></section>
+<section class="path"><div class="section"><div class="guide"><div class="panel"><h3>🔬 適合第一次接觸拉曼的學生</h3><p>每個單元都從問題出發。遇到公式時，先問它代表什麼物理意義，再用資料驗證。</p><div class="chips"><span class="chip">概念建立</span><span class="chip">互動圖表</span><span class="chip">實際數據</span><span class="chip">儀器診斷</span></div></div><div class="panel"><h3>🧪 給想進一步練習的人</h3><p>Repo 內提供原始資料與 Python / R 重算腳本。完成網頁教材後，可以自己重現結果、修改參數並比較差異。</p><a class="go" href="https://github.com/Tai-ShengYeh/raman-calibration">查看原始資料與程式碼 →</a></div></div></div></section>
+<footer class="footer"><strong>Raman spectroscopy turns light into evidence.</strong><br>觀察 · 校正 · 驗證 · 應用</footer>
 </body></html>
