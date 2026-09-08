@@ -26,3 +26,4 @@ jobs:
           git add raman_calibration_tutorial.html raman_calibration_unit1b.html raman_food_additives_tutorial.html
           git commit -m "Improve Raman spectrum axes and add peak reader"
           git push
+# trigger: 2026-09-08 spectrum-axis-upgrade
