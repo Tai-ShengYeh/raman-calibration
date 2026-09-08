@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>食品添加物拉曼指紋 — pixel 與 nm 座標救援術（含測驗）</title>
+<style>
+:root{
+  --ink:#1e293b; --muted:#64748b; --bg:#f8fafc; --card:#fff;
+  --brand:#4f46e5; --brand2:#0d9488; --warn:#dc2626; --ok:#16a34a;
+  --code-bg:#0f172a; --comment:#7dd3a8; --kw:#93c5fd; --str:#fbbf24;
+  --accent-bg:#eef2ff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Noto Sans TC","Microsoft JhengHei","PingFang TC",system-ui,sans-serif;
+     background:var(--bg);color:var(--ink);line-height:1.85;font-size:17px}
+.wrap{max-width:920px;margin:0 auto;padding:0 20px 80px}
+header.hero{background:linear-gradient(135deg,#134e4a 0%,#0d9488 45%,#4f46e5 100%);
+            color:#fff;padding:60px 20px 52px;text-align:center}
+header.hero h1{font-size:clamp(25px,4vw,38px);font-weight:800}
+header.hero p{margin-top:12px;opacity:.93;font-size:18px}
+.badge{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);
+       padding:4px 14px;border-radius:999px;font-size:14px;margin:6px 4px 0}
+nav.toc{background:var(--card);border:1px solid #e2e8f0;border-radius:14px;padding:18px 26px;
+        margin:-26px auto 44px;max-width:920px;box-shadow:0 8px 24px rgba(15,23,42,.08)}
+nav.toc b{color:var(--brand)}
+nav.toc ol{margin:8px 0 0 22px;columns:2;column-gap:36px}
+nav.toc a{color:var(--ink);text-decoration:none;border-bottom:1px dashed #cbd5e1}
+nav.toc a:hover{color:var(--brand)}
+section{margin:50px 0}
+h2{font-size:25px;font-weight:800;color:var(--brand);border-left:6px solid var(--brand);
+   padding-left:14px;margin-bottom:18px}
+h3{font-size:19px;font-weight:700;color:var(--brand2);margin:24px 0 10px}
+p{margin-bottom:14px}
+.card{background:var(--card);border:1px solid #e2e8f0;border-radius:14px;padding:24px 28px;
+      margin:18px 0;box-shadow:0 2px 10px rgba(15,23,42,.05)}
+.tip{background:#ecfdf5;border-left:5px solid var(--ok)}
+.warnbox{background:#fef2f2;border-left:5px solid var(--warn)}
+.keybox{background:var(--accent-bg);border-left:5px solid var(--brand)}
+.tag{display:inline-block;font-size:13px;font-weight:700;padding:2px 10px;border-radius:999px}
+.tag.ok{background:#dcfce7;color:#166534}.tag.no{background:#fee2e2;color:#991b1b}
+table{width:100%;border-collapse:collapse;margin:16px 0;background:#fff}
+th{background:#eef2ff;color:#312e81;text-align:left}
+th,td{border:1px solid #e2e8f0;padding:8px 13px;font-size:15.5px}
+tr:nth-child(even) td{background:#f8fafc}
+pre{background:var(--code-bg);color:#e2e8f0;border-radius:12px;padding:20px 22px;overflow-x:auto;
+    font-size:14.5px;line-height:1.75;margin:14px 0;font-family:Consolas,"Courier New",monospace}
+.c{color:var(--comment)}.kw{color:var(--kw)}.st{color:var(--str)}.fn{color:#f9a8d4}.num{color:#fdba74}
+.filehead{display:inline-block;background:#334155;color:#e2e8f0;border-radius:8px 8px 0 0;
+          padding:4px 16px;font-family:Consolas,monospace;font-size:13.5px;margin-bottom:-6px;margin-left:6px}
+figure{text-align:center;margin:22px 0}
+figcaption{font-size:14px;color:var(--muted);margin-top:8px}
+.formula{background:#fff;border:1px dashed var(--brand);border-radius:10px;text-align:center;
+         font-size:19px;padding:14px;margin:16px 0}
+.flow{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;margin:18px 0}
+.flow .step{background:#fff;border:2px solid var(--brand2);border-radius:10px;padding:8px 16px;
+            font-weight:700;color:var(--brand2)}
+.flow .arr{color:var(--muted);font-weight:800}
+.slider-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:14px 0}
+input[type=range]{flex:1;min-width:200px;accent-color:var(--brand)}
+input[type=number]{padding:8px 12px;border:2px solid #cbd5e1;border-radius:8px;font-size:17px;width:130px}
+.chip{border:1px solid var(--brand);background:#fff;color:var(--brand);border-radius:999px;
+      padding:4px 14px;cursor:pointer;font-size:14px}
+.chip:hover{background:var(--accent-bg)}
+.result{font-size:28px;font-weight:800;color:var(--brand);text-align:center;padding:6px 0 2px}
+.subresult{text-align:center;color:var(--muted);font-size:15px}
+details{background:#f1f5f9;border-radius:10px;padding:12px 18px;margin:10px 0}
+summary{cursor:pointer;font-weight:700;color:var(--brand)}
+/* ---------- quiz ---------- */
+.quiz{border:2px solid var(--brand);border-radius:16px;padding:26px 30px;background:#fff}
+.qq{margin:22px 0;padding:18px;border:1px solid #e2e8f0;border-radius:12px}
+.qq h4{font-size:17px;margin-bottom:10px}
+.qq label{display:block;padding:7px 12px;border-radius:8px;cursor:pointer;margin:3px 0}
+.qq label:hover{background:var(--accent-bg)}
+.qq .fb{margin-top:8px;font-weight:700;display:none}
+.qq.right{border-color:var(--ok);background:#f0fdf4}
+.qq.wrong{border-color:var(--warn);background:#fef2f2}
+#scoreBox{text-align:center;font-size:22px;font-weight:800;padding:16px;border-radius:12px;
+           background:var(--accent-bg);margin-top:20px;display:none}
+.btn{background:var(--brand);color:#fff;border:none;border-radius:10px;padding:12px 30px;
+     font-size:17px;font-weight:700;cursor:pointer;display:block;margin:18px auto 0}
+.btn:hover{opacity:.9}
+footer{text-align:center;color:var(--muted);font-size:14px;padding:30px 0;border-top:1px solid #e2e8f0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:700px){.grid2{grid-template-columns:1fr}nav.toc ol{columns:1}}
+code{background:#e2e8f0;padding:1px 6px;border-radius:4px;font-family:Consolas,monospace;font-size:.92em}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <h1>食品添加物的拉曼指紋<br>— pixel 與 nm 座標救援術</h1>
+  <p>蔗糖、咖啡因、防腐劑通通入列：兩種資料搶救法 + R/Python 實作 + 闖關測驗</p>
+  <div>
+    <span class="badge">🧪 9 種食品添加物</span><span class="badge">📐 nm → cm⁻¹</span>
+    <span class="badge">🔢 pixel → cm⁻¹</span><span class="badge">✍️ 隨堂測驗</span>
+  </div>
+</header>
+
+<nav class="toc wrap" style="padding-top:26px">
+  <b>本課目錄</b>
+  <ol>
+    <li><a href="#mission">任務說明：9 種白色粉末</a></li>
+    <li><a href="#formats">一台儀器，三種座標</a></li>
+    <li><a href="#physics">物理課：拉曼位移公式</a></li>
+    <li><a href="#rescue1">救援術一：pixel → cm⁻¹</a></li>
+    <li><a href="#rescue2">救援術二：nm → cm⁻¹</a></li>
+    <li><a href="#fingerprints">九種添加物指紋總表</a></li>
+    <li><a href="#quiz">闖關測驗（6 題計分）</a></li>
+    <li><a href="#summary">重點整理</a></li>
+  </ol>
+</nav>
+
+<div class="wrap">
+
+<!-- ============ 1 ============ -->
+<section id="mission">
+<h2>1. 任務說明：9 種白色粉末</h2>
+<div class="card">
+<p>食品實驗室的桌上出現 9 罐粉末：<b>蔗糖、葡萄糖、果糖、阿斯巴甜</b>（甜味劑）、<b>咖啡因</b>（提神飲料主角）、<b>苯甲酸、己二烯酸鉀</b>（防腐劑）、<b>檸檬酸</b>（酸味劑）、<b>草酸</b>（對照用有機酸）。它們長得一模一樣，但拉曼光譜一照——指紋立現。</p>
+<p>不過儀器匯出資料時出了點狀況：<b>同一份量測被存成三種橫軸格式</b>，其中兩種不能直接當「拉曼位移」用。這堂課的目標：</p>
+<p class="keybox card" style="margin:10px 0">
+🎯 <b>救援術一</b>：把「像素編號」橫軸換算回波數（複習 + 己二烯酸鉀實戰）<br>
+🎯 <b>救援術二</b>：把「散射光波長 (nm)」橫軸換算成波數（全新物理公式）<br>
+🎯 用 <b>Python 與 R</b> 各寫一次，並用 9 種樣品的資料<b>互相驗證</b><br>
+🎯 最後通過 <b>6 題闖關測驗</b>檢查學習成效
+</p>
+</div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section id="formats">
+<h2>2. 一台儀器，三種座標</h2>
+<div class="card">
+<p>拉曼光譜儀的心臟是 2048 像素的 CCD。軟體匯出時，橫軸可以是三種東西——這次全部出現在資料夾裡：</p>
+<table>
+<tr><th>格式</th><th>橫軸長相</th><th>意義</th><th>能直接用嗎？</th></tr>
+<tr><td>wavenumber 檔</td><td>77.355 … 3806.080</td><td>已校正的<b>拉曼位移</b> (cm⁻¹)</td><td><span class="tag ok">✔ 標準答案</span></td></tr>
+<tr><td>pixel 檔</td><td>0, 1, 2 … 2047</td><td>偵測器<b>像素編號</b></td><td><span class="tag no">✘ 需救援術一</span></td></tr>
+<tr><td>nm 檔</td><td>789.882 … 1119.510</td><td><b>散射光波長</b> (nm)</td><td><span class="tag no">✘ 需救援術二</span></td></tr>
+</table>
+<p>重要線索：三種檔案都是 <b>2048 列</b>——第 k 列都是同一個像素的光強度，只是「地址寫法」不同。</p>
+<table>
+<tr><th>樣品</th><th>食品角色</th><th>手上的格式</th></tr>
+<tr><td>己二烯酸鉀 potassium sorbate</td><td>防腐劑</td><td><b>三種全有</b> ★ 最佳示範教材</td></tr>
+<tr><td>蔗糖 sucrose / 葡萄糖 glucose</td><td>天然甜味劑</td><td>三種全有</td></tr>
+<tr><td>咖啡因 caffeine / 苯甲酸 benzoic acid</td><td>飲料成分 / 防腐劑</td><td>三種全有</td></tr>
+<tr><td>果糖 fructose / 阿斯巴甜 aspartame</td><td>甜味劑</td><td>只有 wavenumber（當對照組）</td></tr>
+<tr><td>檸檬酸 citric acid</td><td>酸味劑</td><td>pixel + wavenumber</td></tr>
+<tr><td><b>草酸 oxalic acid</b></td><td>對照用有機酸</td><td><b>只有 pixel</b> → 留給你自己救援（見測驗）</td></tr>
+</table>
+</div>
+</section>
+
+<!-- ============ 3 ============ -->
+<section id="physics">
+<h2>3. 物理課：拉曼位移公式（救援術二的鑰匙）</h2>
+<div class="card">
+<p>雷射（波長 λ₀）打進樣品後，少數光子把能量留給分子振動再彈出來，波長變長成 λ。能量損失恰好等於分子振動的能量，用<b>波數</b>（cm⁻¹，波長的倒數）表示最方便：</p>
+<div class="formula">拉曼位移 Δν̃ (cm⁻¹) = （ 1/λ₀ − 1/λ ）× 10⁷　　（λ₀、λ 都用 nm）</div>
+<p>×10⁷ 是單位換算：1 nm = 10⁻⁷ cm，所以「1/nm」乘上 10⁷ 就變成「1/cm」。這個公式只適用<b>波長變長的斯托克斯線</b>（拉曼實驗最常用）。</p>
+<p><b>動手試：</b>拖動滑桿改變散射光波長 λ，看拉曼位移怎麼變（雷射固定 785.614 nm，原因見第 5 節）：λ₀ = 785.614 nm，λ = <b id="lamVal">820.1</b> nm</p>
+<div class="slider-row">
+  <span>790 nm</span>
+  <input type="range" id="lamSlider" min="790" max="1119" value="820.1" step="0.1">
+  <span>1119 nm</span>
+</div>
+<div class="result" id="shiftOut">536.1 cm⁻¹</div>
+<div class="subresult" id="shiftNote">這正是蔗糖最強峰的位置（實測 820.139 nm）！</div>
+<p class="warnbox card" style="margin:12px 0"><b>為什麼 nm 檔不能直接用？</b>同一個分子振動（例如 1649 cm⁻¹），換一支雷射，散射光波長就完全不同；但拉曼位移永遠不變。所以光譜學的「通用地址」是波數，不是波長。nm 檔只是「把地址寫成當地路標」，必須翻譯。</p>
+</div>
+<script>
+var L0 = 785.6144;
+function shift(lam){ return 1e7/L0 - 1e7/lam; }
+function upShift(){
+  var lam = +document.getElementById("lamSlider").value;
+  document.getElementById("lamVal").textContent = lam.toFixed(1);
+  var s = shift(lam);
+  document.getElementById("shiftOut").textContent = s.toFixed(1) + " cm\u207B\u00B9";
+  document.getElementById("shiftNote").textContent =
+    (Math.abs(lam-820.139)<1) ? "\u9019\u6b63\u662f\u8517\u7cd6\u6700\u5f37\u5cf0\u7684\u4f4d\u7f6e\uff08\u5be6\u6e2c 820.139 nm\uff09\uff01" :
+    (Math.abs(lam-902.58)<1) ? "\u9019\u662f\u5c71\u68a8\u9178\u91e3\u6700\u5f37\u5cf0 1649 cm\u207B\u00B9\uff08\u5be6\u6e2c 902.580 nm\uff09\uff01" :
+    "\u6ce2\u9578\u8d8a\u9577\uff08\u5206\u5b50\u62ff\u8d70\u8d8a\u591a\u80fd\u91cf\uff09\uff0c\u62c9\u66fc\u4f4d\u79fb\u8d8a\u5927\u3002";
+}
+document.getElementById("lamSlider").addEventListener("input", upShift); upShift();
+</script>
+</section>
+
+<!-- ============ 4 ============ -->
+<section id="rescue1">
+<h2>4. 救援術一：pixel → cm⁻¹（三次多項式）</h2>
+<div class="card">
+<p>原理與鑽石那一課相同：拿一份<b>同儀器、同設定、波數已校正</b>的檔案當「標準尺」，對 2048 個像素配一條三次曲線。這次用<b>己二烯酸鉀</b>示範——它三種格式都有，可以當場對答案。</p>
+<span class="filehead">rescue1_pixel.py</span>
+<pre><span class="c"># ===== 讀取標準尺：己二烯酸鉀的 wavenumber 檔 =====</span>
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+wn    = np.<span class="fn">loadtxt</span>(<span class="st">"potasium_sorbate_200mW_1000ms_avg5_wavenumber_1.txt"</span>)[:, <span class="num">0</span>]
+pixel = np.<span class="fn">arange</span>(<span class="fn">len</span>(wn))              <span class="c"># 0~2047</span>
+coef  = np.<span class="fn">polyfit</span>(pixel, wn, <span class="num">3</span>)        <span class="c"># 三次多項式，殘差 &lt; 0.01 cm⁻¹</span>
+
+<span class="c"># ===== 救援己二烯酸鉀自己的 pixel 檔 =====</span>
+px   = np.<span class="fn">loadtxt</span>(<span class="st">"potasium_sorbate_200mW_1000ms_avg5_pixel_1.txt"</span>)
+chan = px[np.<span class="fn">argmax</span>(px[:, <span class="num">1</span>]), <span class="num">0</span>]      <span class="c"># 最強峰在通道 615</span>
+<span class="fn">print</span>(np.<span class="fn">polyval</span>(coef, chan))          <span class="c"># → 1649.2 cm⁻¹</span></pre>
+<span class="filehead">rescue1_pixel.R</span>
+<pre>wn    &lt;- <span class="fn">read.table</span>(<span class="st">"potasium_sorbate_200mW_1000ms_avg5_wavenumber_1.txt"</span>)$V1
+naph_px &lt;- <span class="fn">data.frame</span>(pixel = <span class="num">0</span>:(<span class="fn">length</span>(wn) - <span class="num">1</span>))
+fit   &lt;- <span class="fn">lm</span>(wn ~ <span class="fn">poly</span>(naph_px$pixel, <span class="num">3</span>, raw = <span class="kw">TRUE</span>))
+
+px   &lt;- <span class="fn">read.table</span>(<span class="st">"potasium_sorbate_200mW_1000ms_avg5_pixel_1.txt"</span>)
+chan &lt;- px[<span class="fn">which.max</span>(px$V2), <span class="num">1</span>]                       <span class="c"># 615</span>
+<span class="fn">predict</span>(fit, <span class="fn">data.frame</span>(pixel = chan))               <span class="c"># → 1649.2 ✔</span></pre>
+<h3>當場對答案：pixel 換算 vs 官方波數檔</h3>
+<table>
+<tr><th>己二烯酸鉀的峰</th><th>pixel 檔通道</th><th>救援術一換算</th><th>wavenumber 檔實測</th><th>判定</th></tr>
+<tr><td>最強峰</td><td>615</td><td>1649.2</td><td>1649.2</td><td><span class="tag ok">✔ 完全一致</span></td></tr>
+<tr><td>第二強</td><td>392</td><td>1144.4</td><td>1144.4</td><td><span class="tag ok">✔</span></td></tr>
+<tr><td>第三強</td><td>502</td><td>1401.8</td><td>1401.8</td><td><span class="tag ok">✔</span></td></tr>
+<tr><td>第四強</td><td>448</td><td>1277.6</td><td>1277.6</td><td><span class="tag ok">✔</span></td></tr>
+</table>
+<p class="tip card" style="margin:10px 0"><b>順手驗收：</b>用同一組係數回頭算鑽石舊檔的通道 471 → 1331.0 cm⁻¹，與鑽石文獻值 1332 相差 1 cm⁻¹。一條校正曲線，全部樣品通用。</p>
+</div>
+</section>
+
+<!-- ============ 5 ============ -->
+<section id="rescue2">
+<h2>5. 救援術二：nm → cm⁻¹（先抓出雷射的真實波長）</h2>
+<div class="card">
+<p>nm 檔記錄的是「每個像素收到的光波長」。套用第 3 節公式就能翻譯成波數——<b>但前提是知道雷射波長 λ₀</b>。儀器標籤寫 785 nm，這是真的嗎？</p>
+<h3>偵探時間：用資料自己找出 λ₀</h3>
+<p>同一份己二烯酸鉀量測，wavenumber 檔給了正確位移 Δν̃，nm 檔給了波長 λ。把公式反過來用：</p>
+<div class="formula">1/λ₀ = Δν̃ + 1/λ　→　λ₀ = 10⁷ ÷（ Δν̃ + 1/λ ）</div>
+<p>2048 個像素各算一遍再平均——三種樣品都算，答案一致：</p>
+<table>
+<tr><th>樣品</th><th>反推的 λ₀</th></tr>
+<tr><td>蔗糖</td><td>785.6144 nm</td></tr>
+<tr><td>葡萄糖</td><td>785.6144 nm</td></tr>
+<tr><td>己二烯酸鉀</td><td>785.6144 nm</td></tr>
+</table>
+<p class="keybox card" style="margin:10px 0">🔎 <b>偵探結論：</b>雷射標稱 785 nm，實際是 <b>785.6144 nm</b>（溫度、老化都會讓雷射微飄）。如果直接用 785.000 去換算，全譜圖會系統性偏移，最大誤差達 <b>17 cm⁻¹</b>——足夠把峰認錯！</p>
+<h3>實戰：翻譯蔗糖的 nm 檔</h3>
+<span class="filehead">rescue2_nm.py</span>
+<pre><span class="c"># ===== 第 1 步：用「雙格式」樣品反推雷射真實波長 =====</span>
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+wn = np.<span class="fn">loadtxt</span>(<span class="st">"glucose_200mW_1000ms_avg5_wavenumber_1.txt"</span>)[:, <span class="num">0</span>]
+nm = np.<span class="fn">loadtxt</span>(<span class="st">"glucose_200mW_1000ms_avg5_nm_1.txt"</span>)[:, <span class="num">0</span>]
+L  = <span class="num">1e7</span> / np.<span class="fn">mean</span>(wn + <span class="num">1e7</span>/nm)      <span class="c"># 785.6144 nm</span>
+
+<span class="c"># ===== 第 2 步：套公式翻譯蔗糖的 nm 檔 =====</span>
+suc   = np.<span class="fn">loadtxt</span>(<span class="st">"sucrose_200mW_1000ms_avg5_nm_1.txt"</span>)
+raman = <span class="num">1e7</span>/L - <span class="num">1e7</span>/suc[:, <span class="num">0</span>]        <span class="c"># 每個像素的拉曼位移！</span>
+
+<span class="c"># ===== 第 3 步：找最強峰並對答案 =====</span>
+i = np.<span class="fn">argmax</span>(suc[:, <span class="num">1</span>])
+<span class="fn">print</span>(<span class="st">f"蔗糖最強峰 {raman[i]:.1f} cm⁻¹"</span>)   <span class="c"># 535.8</span></pre>
+<span class="filehead">rescue2_nm.R</span>
+<pre>wn &lt;- <span class="fn">read.table</span>(<span class="st">"glucose_200mW_1000ms_avg5_wavenumber_1.txt"</span>)$V1
+nm &lt;- <span class="fn">read.table</span>(<span class="st">"glucose_200mW_1000ms_avg5_nm_1.txt"</span>)$V1
+L  &lt;- <span class="num">1e7</span> / <span class="fn">mean</span>(wn + <span class="num">1e7</span>/nm)          <span class="c"># 785.6144 nm</span>
+
+suc   &lt;- <span class="fn">read.table</span>(<span class="st">"sucrose_200mW_1000ms_avg5_nm_1.txt"</span>)
+raman &lt;- <span class="num">1e7</span>/L - <span class="num">1e7</span>/suc$V1
+i     &lt;- <span class="fn">which.max</span>(suc$V2)
+<span class="fn">cat</span>(<span class="st">"蔗糖最強峰:"</span>, raman[i], <span class="st">"cm-1\n"</span>)  <span class="c"># 535.8</span></pre>
+<figure>
+<svg viewBox="0 0 800 450" width="100%" role="img" aria-label="蔗糖 nm 域原始譜圖">
+  <rect x="70" y="30" width="710" height="370" fill="#fbfdff" stroke="#cbd5e1"/>
+  <polyline points="70.0,400.0 73.4,155.3 76.8,139.0 80.2,118.8 83.6,141.5 87.0,136.6 90.3,125.2 93.7,129.2 97.1,138.0 100.4,123.2 103.7,115.8 107.1,121.3 110.4,132.6 113.7,73.4 117.1,85.7 120.4,103.5 123.7,131.6 127.0,137.1 130.3,125.2 133.5,99.1 136.8,97.6 140.1,131.6 143.3,148.4 146.6,145.4 149.9,120.3 153.1,153.8 156.3,154.3 159.6,165.7 162.8,176.0 166.0,149.4 169.2,162.2 172.4,178.5 175.6,149.9 178.8,149.9 182.0,75.9 185.2,149.9 188.4,157.8 191.5,155.3 194.7,162.2 197.8,167.1 201.0,178.0 204.1,152.3 207.3,144.5 210.4,150.4 213.5,133.1 216.7,153.3 219.8,147.9 222.9,136.1 226.0,81.3 229.1,161.7 232.2,138.5 235.2,169.6 238.3,140.5 241.4,153.3 244.5,120.8 247.5,125.7 250.6,137.5 253.6,135.1 256.7,124.2 259.7,90.7 262.7,66.5 265.8,54.2 268.8,64.5 271.8,87.7 274.8,65.0 277.8,95.1 280.8,55.2 283.8,120.8 286.8,130.6 289.8,123.7 292.8,125.7 295.8,134.1 298.7,132.1 301.7,140.0 304.6,145.4 307.6,145.4 310.5,154.8 313.5,152.8 316.4,154.3 319.3,153.8 322.3,168.1 325.2,165.2 328.1,170.6 331.0,168.1 333.9,180.0 336.8,168.6 339.7,185.9 342.6,190.8 345.5,186.9 348.4,188.9 351.3,180.5 354.1,206.1 357.0,199.2 359.9,196.3 362.7,203.2 365.6,205.1 368.4,201.7 371.3,207.6 374.1,216.0 376.9,224.9 379.8,226.8 382.6,224.4 385.4,224.4 388.2,224.9 391.0,236.2 393.8,228.3 396.6,235.7 399.4,238.7 402.2,254.0 405.0,237.2 407.8,252.0 410.6,246.1 413.4,258.4 416.1,255.5 418.9,241.1 421.7,257.4 424.4,246.6 427.2,255.0 429.9,268.3 432.7,254.0 435.4,255.0 438.1,249.5 440.9,253.0 443.6,224.4 446.3,257.4 449.1,251.5 451.8,221.4 454.5,253.0 457.2,265.8 459.9,255.9 462.6,264.8 465.3,263.8 468.0,250.0 470.7,257.4 473.4,266.8 476.1,268.3 478.7,274.7 481.4,276.2 484.1,265.3 486.7,254.5 489.4,253.5 492.1,282.1 494.7,264.3 497.4,266.3 500.0,258.9 502.7,270.7 505.3,255.5 508.0,263.8 510.6,253.0 513.2,267.3 515.9,269.8 518.5,275.2 521.1,276.7 523.7,278.6 526.4,275.7 529.0,279.6 531.6,270.7 534.2,268.3 536.8,276.2 539.4,270.7 542.0,274.7 544.6,258.9 547.2,264.3 549.7,268.3 552.3,277.7 554.9,253.0 557.5,225.9 560.1,240.7 562.6,220.9 565.2,257.9 567.8,241.1 570.3,250.0 572.9,262.4 575.4,276.7 578.0,241.1 580.6,261.9 583.1,278.6 585.6,277.7 588.2,265.3 590.7,287.0 593.3,279.6 595.8,282.6 598.3,274.2 600.9,280.6 603.4,277.7 605.9,283.6 608.5,282.6 611.0,271.7 613.5,285.5 616.0,277.7 618.5,275.2 621.0,278.1 623.5,244.6 626.1,281.6 628.6,278.6 631.1,263.8 633.6,280.1 636.1,278.6 638.6,276.7 641.0,264.3 643.5,270.7 646.0,277.7 648.5,281.1 651.0,266.8 653.5,257.9 656.0,269.3 658.4,264.8 660.9,282.1 663.4,264.3 665.8,252.0 668.3,277.2 670.8,282.1 673.3,264.8 675.7,269.3 678.2,269.8 680.6,280.6 683.1,273.7 685.6,273.2 688.0,259.9 690.5,278.6 692.9,256.9 695.4,269.8 697.8,279.1 700.3,277.7 702.7,276.7 705.2,277.7 707.6,277.7 710.0,238.7 712.5,265.3 714.9,276.7 717.4,293.4 719.8,265.8 722.2,268.3 724.7,274.2 727.1,265.3 729.5,271.2 731.9,274.7 734.4,273.7 736.8,277.2 739.2,249.0 741.7,233.3 744.1,261.4 746.5,248.1 748.9,261.9 751.3,270.7 753.8,271.7 756.2,263.8 758.6,272.2 761.0,267.3 763.4,275.2 765.8,272.7 768.2,269.8 770.7,261.9 773.1,272.7 775.5,262.4 777.9,269.8" fill="none" stroke="#b45309" stroke-width="1.4"/>
+  <g stroke="#94a3b8" font-size="12" fill="#475569">
+    <line x1="70" y1="400" x2="780" y2="400"/><line x1="70" y1="30" x2="70" y2="400"/>
+    <text x="86" y="418">800</text><text x="193" y="418">850</text><text x="300" y="418">900</text><text x="408" y="418">950</text><text x="515" y="418">1000</text><text x="623" y="418">1050</text><text x="730" y="418">1100</text>
+    <text x="38" y="405">0</text><text x="26" y="282">250</text><text x="26" y="158">500</text><text x="26" y="36">750</text>
+  </g>
+  <text x="425" y="440" text-anchor="middle" font-size="13" fill="#475569">散射光波長 (nm) —— 沒有雷射波長就讀不出化學意義</text>
+  <text x="22" y="220" transform="rotate(-90 22 220)" font-size="13" fill="#475569">光強度 (counts)</text>
+</svg>
+<figcaption>圖 1　蔗糖 nm 檔的原始長相。峰是峰、谷是谷，但橫軸「波長」會隨雷射改變，不是通用座標。</figcaption>
+</figure>
+<figure>
+<svg viewBox="0 0 800 450" width="100%" role="img" aria-label="蔗糖換算後譜圖">
+  <rect x="70" y="30" width="710" height="370" fill="#fbfdff" stroke="#cbd5e1"/>
+  <polyline points="68.4,400.0 73.2,155.3 78.0,139.0 82.8,118.8 87.5,141.5 92.2,136.6 96.9,125.2 101.5,129.2 106.2,138.0 110.7,123.2 115.3,115.8 119.9,121.3 124.4,132.6 128.8,73.4 133.3,85.7 137.7,103.5 142.1,131.6 146.5,137.1 150.9,125.2 155.2,99.1 159.5,97.6 163.8,131.6 168.1,148.4 172.3,145.4 176.5,120.3 180.7,153.8 184.8,154.3 189.0,165.7 193.1,176.0 197.2,149.4 201.3,162.2 205.3,178.5 209.3,149.9 213.3,149.9 217.3,75.9 221.3,149.9 225.2,157.8 229.1,155.3 233.0,162.2 236.9,167.1 240.8,178.0 244.6,152.3 248.4,144.5 252.2,150.4 256.0,133.1 259.7,153.3 263.5,147.9 267.2,136.1 270.9,81.3 274.5,161.7 278.2,138.5 281.8,169.6 285.4,140.5 289.0,153.3 292.6,120.8 296.2,125.7 299.7,137.5 303.3,135.1 306.8,124.2 310.3,90.7 313.7,66.5 317.2,54.2 320.6,64.5 324.0,87.7 327.4,65.0 330.8,95.1 334.2,55.2 337.6,120.8 340.9,130.6 344.2,123.7 347.5,125.7 350.8,134.1 354.1,132.1 357.3,140.0 360.6,145.4 363.8,145.4 367.0,154.8 370.2,152.8 373.4,154.3 376.6,153.8 379.7,168.1 382.8,165.2 386.0,170.6 389.1,168.1 392.1,180.0 395.2,168.6 398.3,185.9 401.3,190.8 404.4,186.9 407.4,188.9 410.4,180.5 413.4,206.1 416.4,199.2 419.3,196.3 422.3,203.2 425.2,205.1 428.1,201.7 431.1,207.6 433.9,216.0 436.8,224.9 439.7,226.8 442.6,224.4 445.4,224.4 448.2,224.9 451.1,236.2 453.9,228.3 456.7,235.7 459.5,238.7 462.2,254.0 465.0,237.2 467.7,252.0 470.5,246.1 473.2,258.4 475.9,255.5 478.6,241.1 481.3,257.4 484.0,246.6 486.7,255.0 489.3,268.3 492.0,254.0 494.6,255.0 497.2,249.5 499.9,253.0 502.5,224.4 505.0,257.4 507.6,251.5 510.2,221.4 512.8,253.0 515.3,265.8 517.9,255.9 520.4,264.8 522.9,263.8 525.4,250.0 527.9,257.4 530.4,266.8 532.9,268.3 535.4,274.7 537.8,276.2 540.3,265.3 542.7,254.5 545.1,253.5 547.6,282.1 550.0,264.3 552.4,266.3 554.8,258.9 557.2,270.7 559.5,255.5 561.9,263.8 564.3,253.0 566.6,267.3 569.0,269.8 571.3,275.2 573.6,276.7 575.9,278.6 578.2,275.7 580.5,279.6 582.8,270.7 585.1,268.3 587.4,276.2 589.7,270.7 591.9,274.7 594.2,258.9 596.4,264.3 598.6,268.3 600.9,277.7 603.1,253.0 605.3,225.9 607.5,240.7 609.7,220.9 611.9,257.9 614.0,241.1 616.2,250.0 618.4,262.4 620.5,276.7 622.7,241.1 624.8,261.9 627.0,278.6 629.1,277.7 631.2,265.3 633.3,287.0 635.4,279.6 637.5,282.6 639.6,274.2 641.7,280.6 643.8,277.7 645.9,283.6 647.9,282.6 650.0,271.7 652.0,285.5 654.1,277.7 656.1,275.2 658.1,278.1 660.2,244.6 662.2,281.6 664.2,278.6 666.2,263.8 668.2,280.1 670.2,278.6 672.2,276.7 674.2,264.3 676.1,270.7 678.1,277.7 680.1,281.1 682.0,266.8 684.0,257.9 685.9,269.3 687.9,264.8 689.8,282.1 691.7,264.3 693.7,252.0 695.6,277.2 697.5,282.1 699.4,264.8 701.3,269.3 703.2,269.8 705.1,280.6 707.0,273.7 708.9,273.2 710.7,259.9 712.6,278.6 714.5,256.9 716.3,269.8 718.2,279.1 720.0,277.7 721.9,276.7 723.7,277.7 725.5,277.7 727.4,238.7 729.2,265.3 731.0,276.7 732.8,293.4 734.6,265.8 736.4,268.3 738.2,274.2 740.0,265.3 741.8,271.2 743.6,274.7 745.4,273.7 747.2,277.2 748.9,249.0 750.7,233.3 752.5,261.4 754.2,248.1 756.0,261.9 757.7,270.7 759.5,271.7 761.2,263.8 762.9,272.2 764.7,267.3 766.4,275.2 768.1,272.7 769.8,269.8 771.6,261.9 773.3,272.7 775.0,262.4 776.7,269.8" fill="none" stroke="#0d9488" stroke-width="1.4"/>
+  <line x1="157" y1="30" x2="157" y2="400" stroke="#dc2626" stroke-dasharray="6 5" stroke-width="1.4"/>
+  <text x="165" y="60" font-size="14" fill="#b91c1c" font-weight="bold">最強峰 535.8 cm⁻¹</text>
+  <g stroke="#94a3b8" font-size="12" fill="#475569">
+    <line x1="70" y1="400" x2="780" y2="400"/><line x1="70" y1="30" x2="70" y2="400"/>
+    <text x="144" y="418">500</text><text x="334" y="418">1500</text><text x="525" y="418">2500</text><text x="715" y="418">3500</text>
+    <text x="38" y="405">0</text><text x="26" y="282">250</text><text x="26" y="158">500</text><text x="26" y="36">750</text>
+  </g>
+  <text x="425" y="440" text-anchor="middle" font-size="13" fill="#475569">拉曼位移 (cm⁻¹) —— 換算後，可與任何文獻比對</text>
+  <text x="22" y="220" transform="rotate(-90 22 220)" font-size="13" fill="#475569">光強度 (counts)</text>
+</svg>
+<figcaption>圖 2　同一份蔗糖資料，套用 Δν̃ = (1/λ₀ − 1/λ)×10⁷ 之後：橫軸變成拉曼位移，最強峰 535.8 cm⁻¹ 與官方波數檔的 531.8 相差僅 4 cm⁻¹（nm 軸自身的精度極限）。</figcaption>
+</figure>
+</div>
+</section>
+
+<!-- ============ 6 ============ -->
+<section id="fingerprints">
+<h2>6. 九種添加物指紋總表</h2>
+<div class="card">
+<p>把每種樣品（優先採用 wavenumber 檔）的主要拉曼峰整理成指紋卡——這就是未來鑑定未知粉末的對照資料庫：</p>
+<table>
+<tr><th>樣品</th><th>角色</th><th>主要拉曼峰 (cm⁻¹)</th><th>最強峰</th></tr>
+<tr><td>己二烯酸鉀</td><td>防腐劑</td><td>374、883、1144、1278、1402、<b>1649</b></td><td>1649（C=C 伸縮）</td></tr>
+<tr><td>苯甲酸</td><td>防腐劑</td><td>794、<b>999</b>、1287、1438、1602</td><td>999（文獻 1003，苯環呼吸 ✔）</td></tr>
+<tr><td>咖啡因</td><td>飲料成分</td><td><b>554</b>、739、1326、1598、1698</td><td>554（文獻 745/554 雙強峰 ✔）</td></tr>
+<tr><td>蔗糖</td><td>天然甜味劑</td><td>532、846、911、1120、1363、1460</td><td>532</td></tr>
+<tr><td>葡萄糖</td><td>天然甜味劑</td><td>540、1115、1343、1458</td><td>540</td></tr>
+<tr><td>果糖</td><td>天然甜味劑</td><td>623、1261、1340、1467</td><td>623</td></tr>
+<tr><td>阿斯巴甜</td><td>人工甜味劑</td><td>1002、1268、1379、1602</td><td>1002</td></tr>
+<tr><td>檸檬酸</td><td>酸味劑</td><td>781、939、1388、1429</td><td>939</td></tr>
+<tr><td>草酸</td><td>對照有機酸</td><td>只有 pixel 檔 → <b>測驗後揭曉</b></td><td>？</td></tr>
+</table>
+<figure>
+<svg viewBox="0 0 800 450" width="100%" role="img" aria-label="己二烯酸鉀指紋">
+  <rect x="70" y="30" width="710" height="370" fill="#fbfdff" stroke="#cbd5e1"/>
+  <polyline points="70.1,400.0 74.7,361.0 79.3,352.6 83.9,337.0 88.5,329.5 93.0,323.5 97.5,317.9 102.0,314.8 106.5,315.2 111.0,318.2 115.4,318.4 119.9,312.0 124.3,304.6 128.6,305.8 133.0,310.3 137.3,312.2 141.6,310.8 145.9,309.9 150.2,310.5 154.5,311.4 158.7,313.1 162.9,312.2 167.1,312.8 171.3,311.7 175.5,312.0 179.6,315.3 183.7,316.8 187.8,316.7 191.9,313.9 196.0,311.3 200.0,314.7 204.0,316.5 208.0,308.5 212.0,316.3 216.0,317.0 219.9,317.1 223.9,297.8 227.8,320.3 231.7,322.6 235.5,321.5 239.4,315.2 243.2,317.4 247.0,318.5 250.8,317.1 254.6,320.8 258.4,323.5 262.1,322.0 265.8,321.3 269.6,316.2 273.2,213.3 276.9,316.8 280.6,323.3 284.2,316.3 287.8,323.5 291.4,320.1 295.0,316.2 298.6,279.8 302.1,299.6 305.7,312.0 309.2,316.3 312.7,315.3 316.2,305.6 319.7,297.2 323.1,250.7 326.5,308.6 330.0,301.2 333.4,319.4 336.8,324.4 340.1,324.8 343.5,324.0 346.8,321.9 350.1,321.6 353.5,309.6 356.7,318.4 360.0,319.1 363.3,306.2 366.5,285.4 369.8,66.6 373.0,301.9 376.2,324.9 379.4,331.1 382.5,333.3 385.7,337.8 388.8,337.5 391.9,338.1 395.1,339.6 398.1,340.6 401.2,343.2 404.3,341.6 407.3,345.5 410.4,343.9 413.4,346.6 416.4,347.5 419.4,347.3 422.4,347.0 425.4,348.1 428.3,348.6 431.3,351.2 434.2,351.9 437.1,354.1 440.0,355.4 442.9,356.4 445.8,356.1 448.6,357.2 451.5,357.0 454.3,358.3 457.1,360.4 459.9,361.9 462.7,362.5 465.5,362.2 468.3,363.8 471.0,363.6 473.8,365.3 476.5,366.0 479.2,364.3 481.9,366.9 484.6,367.1 487.3,367.5 490.0,368.0 492.6,366.9 495.3,367.5 497.9,367.1 500.5,368.0 503.1,365.8 505.7,369.9 508.3,369.1 510.9,365.2 513.5,369.9 516.0,370.3 518.6,371.3 521.1,372.4 523.6,372.0 526.1,369.5 528.6,371.8 531.1,372.7 533.6,374.6 536.1,373.6 538.5,375.3 541.0,374.2 543.4,373.7 545.9,374.5 548.3,376.5 550.7,375.1 553.1,376.0 555.5,375.9 557.8,377.3 560.2,373.9 562.6,375.7 564.9,376.9 567.3,377.9 569.6,377.7 571.9,378.7 574.2,378.4 576.5,379.0 578.8,378.1 581.1,378.6 583.4,379.1 585.6,378.9 587.9,378.4 590.1,379.0 592.4,379.2 594.6,378.1 596.8,378.2 599.1,378.2 601.3,378.7 603.5,376.2 605.7,376.3 607.8,374.8 610.0,369.7 612.2,376.3 614.3,377.4 616.5,377.9 618.6,378.5 620.8,381.4 622.9,377.6 625.0,373.6 627.1,377.1 629.3,379.7 631.4,380.3 633.5,383.0 635.5,381.8 637.6,383.0 639.7,381.7 641.8,382.3 643.8,381.9 645.9,382.7 647.9,383.3 650.0,380.6 652.0,383.0 654.0,381.9 656.0,384.0 658.1,382.9 660.1,378.3 662.1,382.6 664.1,382.3 666.1,380.8 668.1,382.2 670.0,382.0 672.0,382.2 674.0,382.2 676.0,382.0 677.9,382.0 679.9,383.9 681.8,381.7 683.8,380.5 685.7,382.3 687.7,381.7 689.6,381.8 691.5,382.3 693.4,379.1 695.4,383.9 697.3,383.0 699.2,382.8 701.1,383.6 703.0,383.0 704.9,385.0 706.8,384.2 708.7,382.7 710.6,380.3 712.4,382.7 714.3,380.8 716.2,383.0 718.1,383.9 719.9,383.1 721.8,383.1 723.7,384.0 725.5,383.1 727.4,377.8 729.2,382.7 731.1,383.2 732.9,383.9 734.8,383.5 736.6,381.5 738.4,384.2 740.3,382.0 742.1,381.2 744.0,382.8 745.8,382.0 747.6,383.5 749.4,380.5 751.3,376.0 753.1,382.2 754.9,380.7 756.7,380.6 758.5,382.0 760.4,382.8 762.2,380.7 764.0,381.9 765.8,380.2 767.6,383.7 769.4,383.3 771.2,383.7 773.0,382.3 774.8,382.5 776.6,381.1 778.4,383.4" fill="none" stroke="#4f46e5" stroke-width="1.3"/>
+  <g font-size="11.5" fill="#b91c1c" font-weight="bold">
+    <text x="352" y="70">1649</text><text x="308" y="180">1402</text><text x="262" y="230">1278</text>
+    <text x="238" y="262">1144</text><text x="196" y="330">883</text><text x="118" y="382">374</text>
+  </g>
+  <g stroke="#94a3b8" font-size="12" fill="#475569">
+    <line x1="70" y1="400" x2="780" y2="400"/><line x1="70" y1="30" x2="70" y2="400"/>
+    <text x="144" y="418">500</text><text x="334" y="418">1500</text><text x="525" y="418">2500</text><text x="715" y="418">3500</text>
+    <text x="38" y="405">0</text><text x="20" y="278">2000</text><text x="20" y="157">4000</text><text x="20" y="36">6000</text>
+  </g>
+  <text x="425" y="440" text-anchor="middle" font-size="13" fill="#475569">拉曼位移 (cm⁻¹)</text>
+  <text x="22" y="220" transform="rotate(-90 22 220)" font-size="13" fill="#475569">光強度 (counts)</text>
+</svg>
+<figcaption>圖 3　己二烯酸鉀（防腐劑）的拉曼指紋，最強峰 1649 cm⁻¹ 來自共軛雙鍵 C=C 伸縮振動。</figcaption>
+</figure>
+</div>
+</section>
+
+<!-- ============ 7 QUIZ ============ -->
+<section id="quiz">
+<h2>7. 闖關測驗：檢查你的學習成效</h2>
+<div class="quiz" id="quizBox">
+<p style="text-align:center;color:var(--muted)">共 6 題：4 選擇 + 2 計算。寫完按「批改」，每題立即顯示對錯與解析。</p>
+
+<div class="qq" data-q="1">
+<h4>Q1（單選）拉曼光譜慣用的橫軸「拉曼位移」，單位是什麼？</h4>
+<label><input type="radio" name="q1" value="a"> nm（波長）</label>
+<label><input type="radio" name="q1" value="b"> cm⁻¹（波數）</label>
+<label><input type="radio" name="q1" value="c"> 像素編號</label>
+<label><input type="radio" name="q1" value="d"> counts（光強度）</label>
+<div class="fb"></div>
+</div>
+
+<div class="qq" data-q="2">
+<h4>Q2（單選）蔗糖最強散射光在 820.139 nm（雷射 785.614 nm）。它的拉曼位移最接近多少？</h4>
+<label><input type="radio" name="q2" value="a"> 約 35 cm⁻¹</label>
+<label><input type="radio" name="q2" value="b"> 約 820 cm⁻¹</label>
+<label><input type="radio" name="q2" value="c"> 約 536 cm⁻¹</label>
+<label><input type="radio" name="q2" value="d"> 約 12729 cm⁻¹</label>
+<div class="fb"></div>
+</div>
+
+<div class="qq" data-q="3">
+<h4>Q3（計算）己二烯酸鉀最強峰的散射光在 <b>902.580 nm</b>，雷射 785.6144 nm。求拉曼位移（cm⁻¹，誤差 ±5 內算對）：</h4>
+<div style="display:flex;gap:10px;align-items:center">
+<input type="number" id="q3in" step="any" placeholder="輸入數字">
+<span>cm⁻¹</span></div>
+<div class="fb"></div>
+</div>
+
+<div class="qq" data-q="4">
+<h4>Q4（單選）用標稱 785.000 nm 代替實測 785.614 nm 換算，譜圖最多偏 17 cm⁻¹。這告訴我們什麼？</h4>
+<label><input type="radio" name="q4" value="a"> 波長差 0.6 nm 而已，沒關係</label>
+<label><input type="radio" name="q4" value="b"> 雷射實際波長會偏離標稱值，λ₀ 必須用資料實測</label>
+<label><input type="radio" name="q4" value="c"> 公式裡不應該乘 10⁷</label>
+<label><input type="radio" name="q4" value="d"> CCD 壞掉了</label>
+<div class="fb"></div>
+</div>
+
+<div class="qq" data-q="5">
+<h4>Q5（單選）要建立「pixel → cm⁻¹」校正曲線，哪種檔案最適合當標準尺？</h4>
+<label><input type="radio" name="q5" value="a"> 任何一台拉曼光譜儀的文獻譜圖</label>
+<label><input type="radio" name="q5" value="b"> 同一台儀器、相同設定、橫軸已校正成波數的檔案</label>
+<label><input type="radio" name="q5" value="c"> 樣品顏色最漂亮的檔案</label>
+<label><input type="radio" name="q5" value="d"> nm 檔</label>
+<div class="fb"></div>
+</div>
+
+<div class="qq" data-q="6">
+<h4>Q6（計算）草酸的 pixel 檔裡有個明顯的峰在<b>通道 275</b>。用本課的三次校正曲線，它對應多少波數？（±5 內算對）<br>
+<span style="font-size:14px;color:var(--muted)">小抄：Δν̃ ≈ 77.355 + 3.04829x − 0.000887049x² + 0.000000140579x³</span></h4>
+<div style="display:flex;gap:10px;align-items:center">
+<input type="number" id="q6in" step="any" placeholder="輸入數字">
+<span>cm⁻¹</span></div>
+<div class="fb"></div>
+</div>
+
+<button class="btn" onclick="grade()">批改，看成績！</button>
+<div id="scoreBox"></div>
+</div>
+
+<script>
+var COEF=[1.405785321e-07,-8.8704888884e-04,3.048289766,77.3547341], L0q=785.6144;
+function toWN(x){return ((COEF[0]*x+COEF[1])*x+COEF[2])*x+COEF[3];}
+function grade(){
+  var score=0, total=6;
+  var ans={1:"b",2:"c",4:"b",5:"b"};
+  var explain={
+    1:"拉曼位移用波數 cm⁻¹ 表示，才是與雷射無關的通用座標。",
+    2:"(1/785.614 − 1/820.139)×10⁷ = 12728.9 − 12193.1 ≈ 536 cm⁻¹。",
+    3:"(1/785.6144 − 1/902.580)×10⁷ = 12728.9 − 11080.3 ≈ 1649 cm⁻¹。",
+    4:"0.6 nm 的波長差在低波數區會被放大成十幾 cm⁻¹，雷射波長必須實測。",
+    5:"校正曲線是儀器+設定的專屬產物，必須用同一台、同設定、已校正的檔案。",
+    6:"代入公式：77.355 + 3.04829×275 − 0.000887×275² + … ≈ 851 cm⁻¹。"};
+  var key3=shift(902.580), key6=toWN(275);
+  document.querySelectorAll(".qq").forEach(function(q){
+    var n=q.dataset.q, ok=false, fb=q.querySelector(".fb");
+    fb.style.display="block";
+    if(ans[n]){
+      var sel=q.querySelector("input:checked");
+      ok=(sel && sel.value===ans[n]);
+    } else if(n==="3"){
+      var v=parseFloat(document.getElementById("q3in").value);
+      ok=!isNaN(v)&&Math.abs(v-key3)<=5;
+    } else if(n==="6"){
+      var v=parseFloat(document.getElementById("q6in").value);
+      ok=!isNaN(v)&&Math.abs(v-key6)<=5;
+    }
+    q.classList.toggle("right",ok); q.classList.toggle("wrong",!ok);
+    fb.textContent=(ok?"✔ 答對！ ":"✘ 答錯了。 ")+explain[n];
+    fb.style.color=ok?"#16a34a":"#dc2626";
+    if(ok)score++;
+  });
+  var box=document.getElementById("scoreBox");
+  box.style.display="block";
+  var msg=score===6?"🏆 滿分！你已經是座標救援大師，可以去看草酸的全譜了。":
+          score>=4?"👍 不錯！錯的題目看解析後再算一次就會了。":
+          score>=2?"📖 觀念還有縫，建議重讀第 3、5 節再挑戰一次。":
+          "💪 別氣餒！從第 3 節的公式開始重新走一遍，你會發現其實只有一條公式。";
+  box.innerHTML="得分：<span style='font-size:30px;color:var(--brand)'>"+score+" / "+total+"</span><br>"+msg;
+}
+function shift(lam){return 1e7/L0q-1e7/lam;}
+</script>
+</section>
+
+<!-- ============ 8 ============ -->
+<section id="summary">
+<h2>8. 重點整理</h2>
+<div class="card">
+<p><b>① 三種橫軸：</b>波數（標準答案）、像素（需多項式校正曲線）、波長 nm（需拉曼位移公式）。</p>
+<p><b>② 救援術一（pixel → cm⁻¹）：</b>用同儀器已校正檔案配三次多項式。Python：<code>np.polyfit</code> + <code>np.polyval</code>；R：<code>lm(y ~ poly(x,3,raw=TRUE))</code> + <code>predict</code>。</p>
+<p><b>③ 救援術二（nm → cm⁻¹）：</b>Δν̃ = (1/λ₀ − 1/λ)×10⁷。λ₀ 不能抄標籤——用「雙格式樣品」反推（本批資料實測 785.6144 nm，不是 785.000！）。</p>
+<p><b>④ 驗證哲學：</b>同一樣品的多種格式互相對答案（己二烯酸鉀 1649.2 = 1649.2），再加文獻峰抽查（苯甲酸 999 vs 1003 ✔）。永遠不要只靠一種證據。</p>
+<p><b>⑤ 指紋資料庫：</b>9 種食品添加物的主要峰位已整理成表——下次遇到白色粉末，先照譜、再對卡。</p>
+<details><summary>測驗後揭曉：草酸的峰位（救援術一練習答案）</summary>
+草酸 pixel 檔的主要峰換算後：約 <b>476、851、1386、1555 cm⁻¹</b>（通道 136、275、495、571）。最強峰在 851 cm⁻¹ 附近——現在你手上多了一張指紋卡。</details>
+</div>
+</section>
+
+<footer>
+食品添加物拉曼指紋教學 · 資料：imai_0825_2026 實測（200 mW / 1000 ms / 平均 5 次，785 nm 雷射）· Python 3 / NumPy 與 R 皆可重現
+</footer>
+</div>
+</body>
+</html>
