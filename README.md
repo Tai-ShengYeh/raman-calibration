@@ -12,7 +12,8 @@ Read online (bilingual, toggle at the top-right): <https://tai-shengyeh.github.i
 | `raman_food_additives_tutorial.html` | 食品添加物拉曼指紋（被 unit1b 連結） / Raman fingerprints of food additives (linked from Unit 1B) |
 | `glossary.js` | 中英專有名詞對照與說明；每頁底部自動產生對照表，內文名詞可懸停或點選查看 / Bilingual glossary with explanations; rendered at the bottom of every page, and terms in the text show a popover on hover or tap |
 | `i18n.js`、`i18n.css` | 中英切換機制（`?lang=en` 或 `?lang=zh`，偏好會記在瀏覽器） / Language toggle (`?lang=en` or `?lang=zh`; the choice is remembered in the browser) |
-| `worksheets/` | 四張學習單（學生版） / Four student worksheets |
+| `worksheets/` | 四張學習單（學生版），含 B、C 站的 Excel 保底軌與活動 E / Four student worksheets, with the Excel fallback track for stations B and C and Activity E |
+| `worksheets/activity_E/` | 活動 E「三軌一致性」：同一組 (NIST, 量測) 資料用 Excel／Python／R 各擬合一次的三份腳本與範例 / Activity E "three-track consistency": the same (NIST, measured) pairs fitted with Excel, Python and R; three scripts plus example data |
 | `unit1b_data/`、`README_unit1b_data.md` | 原始量測資料與 SHA-256、量測條件 / Raw measurements with SHA-256 and acquisition conditions |
 | `unit1b_calibration.py` / `.R`、`usb4000_laser_check.py` | 重算所有數值與 `figs/` 圖 / Recompute every number and the figures in `figs/` |
 | `build_unit1b.py` | 由 `unit1b_results.json`、`unit1b_survey.json`、`figs/` 組出 `raman_calibration_unit1b.html`（雙語標記是在產出後加入的） / Builds `raman_calibration_unit1b.html` from the results, survey and figures (the bilingual markup was added after the build) |
@@ -23,13 +24,13 @@ Read online (bilingual, toggle at the top-right): <https://tai-shengyeh.github.i
 
 ## 教學實施版本 / Classroom release
 
-**`v1.0.1-fall2026`**（2026-09-10 凍結；取代同日的 `v1.0-fall2026`，僅將第一份教學頁的第 1 節標題改為學科中性）是 2026 年秋季在美和科技大學食品營養系與國立陽明交通大學應用化學系同步授課使用的版本：四站實作模組（A 氖燈查軸／B 雷射波長／C 苯甲酸與咖啡因／D 資料庫比對）、四張學生學習單、三份教學網頁與 82 條雙語詞彙。模組進行期間教材不再更動；之後的修訂都在這個 tag 之後。引用或重現課堂結果時，請指明此 tag，而不是 `main`。
-**`v1.0.1-fall2026`** (frozen 2026-09-10; supersedes the same-day `v1.0-fall2026`, changing only the section-1 heading of the first tutorial page to a discipline-neutral one) is the version taught in Fall 2026 at the Department of Food and Nutrition, Meiho University and the Department of Applied Chemistry, National Yang Ming Chiao Tung University: the four-station module (A neon-lamp axis check / B laser wavelength / C benzoic acid and caffeine / D database matching), the four student worksheets, the three teaching pages and the 82-term bilingual glossary. The material is not changed while the module is running; later revisions come after this tag. When citing or reproducing classroom results, refer to this tag rather than `main`.
+**`v1.1-fall2026`**（2026-09-10 凍結；取代同日的 `v1.0.1`：學習單新增 B、C 站的 Excel 保底軌、把「三軌一致性」拆成獨立的活動 E，並附 `worksheets/activity_E/` 腳本）是 2026 年秋季在美和科技大學食品營養系與國立陽明交通大學應用化學系同步授課使用的版本：四站實作模組（A 氖燈查軸／B 雷射波長／C 苯甲酸與咖啡因／D 資料庫比對）、四張學生學習單、三份教學網頁與 82 條雙語詞彙。模組進行期間教材不再更動；之後的修訂都在這個 tag 之後。引用或重現課堂結果時，請指明此 tag，而不是 `main`。
+**`v1.1-fall2026`** (frozen 2026-09-10; supersedes the same-day `v1.0.1`: the worksheets gain an Excel fallback track for stations B and C, the three-track consistency check becomes a separate Activity E, and `worksheets/activity_E/` ships the scripts) is the version taught in Fall 2026 at the Department of Food and Nutrition, Meiho University and the Department of Applied Chemistry, National Yang Ming Chiao Tung University: the four-station module (A neon-lamp axis check / B laser wavelength / C benzoic acid and caffeine / D database matching), the four student worksheets, the three teaching pages and the 82-term bilingual glossary. The material is not changed while the module is running; later revisions come after this tag. When citing or reproducing classroom results, refer to this tag rather than `main`.
 
 ```
-git clone --branch v1.0.1-fall2026 https://github.com/Tai-ShengYeh/raman-calibration.git
+git clone --branch v1.1-fall2026 https://github.com/Tai-ShengYeh/raman-calibration.git
 ```
-線上版本 / Browse this exact version: <https://github.com/Tai-ShengYeh/raman-calibration/tree/v1.0.1-fall2026>
+線上版本 / Browse this exact version: <https://github.com/Tai-ShengYeh/raman-calibration/tree/v1.1-fall2026>
 
 ## 雙語標記方式 / How the bilingual markup works
 
