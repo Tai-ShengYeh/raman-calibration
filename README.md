@@ -21,6 +21,16 @@ Read online (bilingual, toggle at the top-right): <https://tai-shengyeh.github.i
 
 重現流程 / Reproduce: `python unit1b_calibration.py && python usb4000_laser_check.py && python build_unit1b.py`
 
+## 教學實施版本 / Classroom release
+
+**`v1.0-fall2026`**（2026-09-10 凍結）是 2026 年秋季在美和科技大學食品營養系實際授課使用的版本：四站實作模組（A 氖燈查軸／B 雷射波長／C 苯甲酸與咖啡因／D 資料庫比對）、四張學生學習單、三份教學網頁與 82 條雙語詞彙。模組進行期間教材不再更動；之後的修訂都在這個 tag 之後。引用或重現課堂結果時，請指明此 tag，而不是 `main`。
+**`v1.0-fall2026`** (frozen 2026-09-10) is the version actually taught in Fall 2026 at the Department of Food and Nutrition, Meiho University: the four-station module (A neon-lamp axis check / B laser wavelength / C benzoic acid and caffeine / D database matching), the four student worksheets, the three teaching pages and the 82-term bilingual glossary. The material is not changed while the module is running; later revisions come after this tag. When citing or reproducing classroom results, refer to this tag rather than `main`.
+
+```
+git clone --branch v1.0-fall2026 https://github.com/Tai-ShengYeh/raman-calibration.git
+```
+線上版本 / Browse this exact version: <https://github.com/Tai-ShengYeh/raman-calibration/tree/v1.0-fall2026>
+
 ## 雙語標記方式 / How the bilingual markup works
 
 每段文字都寫成相鄰的一對：`<span lang="zh-Hant">中文</span><span lang="en">English</span>`；`i18n.css` 依 `<html lang>` 只顯示其中一種，`i18n.js` 負責切換按鈕、記住偏好、把 `?lang=` 帶到站內連結，並根據 `glossary.js` 自動在內文標出專有名詞。
